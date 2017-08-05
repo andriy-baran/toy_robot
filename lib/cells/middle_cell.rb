@@ -1,6 +1,5 @@
 class MiddleCell
-
-	def north; end
+  def north; end
 
   def south; end
 

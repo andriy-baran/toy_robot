@@ -1,5 +1,4 @@
 class SouthCell
-
   def north; end
 
   def east; end
