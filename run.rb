@@ -1,20 +1,14 @@
-require_relative 'lib/cells/east_cell'
-require_relative 'lib/cells/south_east_cell'
-require_relative 'lib/cells/north_east_cell'
-require_relative 'lib/cells/west_cell'
-require_relative 'lib/cells/south_west_cell'
-require_relative 'lib/cells/north_west_cell'
-require_relative 'lib/cells/south_cell'
-require_relative 'lib/cells/north_cell'
-require_relative 'lib/cells/middle_cell'
-require_relative 'lib/toy_robot/position'
-require_relative 'lib/toy_robot/map'
-require_relative 'lib/toy_robot/legs'
-require_relative 'lib/toy_robot/compass'
-require_relative 'lib/toy_robot/robot'
-require_relative 'lib/interpreter/parser'
-require_relative 'lib/interpreter/scenario'
+require 'pry'
+require 'ostruct'
+require 'forwardable'
+require_relative './lib/medium'
+require_relative './lib/world/cell'
+require_relative './lib/world/landscape'
+require_relative './lib/world/terrain'
+require_relative './lib/toy_robot/head'
+require_relative './lib/toy_robot/processor'
+require_relative './lib/toy_robot/robot'
+require_relative './lib/world/space'
 
-file = File.open('test.txt')
-@scenario = Scenario.new(file)
-@scenario.play
+s = Space.new
+s.start_time

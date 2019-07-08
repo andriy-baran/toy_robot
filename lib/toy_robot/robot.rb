@@ -1,30 +1,65 @@
 class Robot
-  def initialize(x: 0, y: 0, facing: 'west', size: 5)
-    @size = size
-    @facing = facing
-    @compas = Compass.new(@facing)
-    @legs = Legs.new(x: x, y: y, size: @size)
+  extend Forwardable
+
+  def_delegators :@head, :current_coordinates
+
+  attr_accessor :mediator
+
+  def initialize
+    @head = Head.new(:west, x: nil, y: nil)
+    @processor = Processor.new
+    @processor.mediator = Medium.new.tap do |m|
+      m.on_place = ->(x,y,facing) { self.send(:place,x,y,facing) }
+      m.on_move = -> { self.send(:move) }
+      m.on_left = -> { self.send(:left) }
+      m.on_right = -> { self.send(:right) }
+      m.on_report = -> { self.send(:report) }
+    end
   end
 
+  def update_coordinates(x,y)
+    @head.x = x
+    @head.y = y
+  end
+
+  def update_facing(facing)
+    @head.set(facing)
+  end
+
+  def execute_scenario
+    @processor.run
+  end
+
+  def placed?
+    @head.has_coordinates?
+  end
+
+  private
+
   def left
-    @facing = @compas.left
+    @head.left
   end
 
   def right
-    @facing = @compas.right
+    @head.right
   end
 
   def move
-    @legs.go(@facing)
+    return unless placed?
+    mediator.move(@head.current_coordinates,@head.facing,self)
   end
 
-  def place(x, y, facing)
-    @facing = facing.downcase
-    @compas.set(@facing)
-    @legs.jump(x: x.to_i, y: y.to_i)
+  def place(x,y,facing)
+    return unless %i(north east south west).include?(facing)
+    cell_exists = mediator.scan(x,y)
+    mediator.place(x,y,facing,self) if cell_exists
   end
 
   def report
-    puts "#{@legs.position.x},#{@legs.position.y},#{@facing.upcase}"
+    puts @head.report_position
+  end
+
+  def facing
+    @head.facing
   end
 end
