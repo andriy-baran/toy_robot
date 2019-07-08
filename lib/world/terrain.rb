@@ -21,12 +21,37 @@ class Terrain
   def place_object(x,y,facing,obj)
     cell_on(x,y).object = obj
     mediator.placed(x,y,facing)
+    # print_map
   end
 
   def move_object(from,to,obj)
     cell_on(*to).object = cell_on(*from).object
     cell_on(*from).object = nil
     mediator.moved(*to)
+    # print_map
+  end
+
+  def print_map
+    puts
+    @cells.values.each_slice(5).to_a.transpose.each do |row|
+      puts row.map { |c|
+        if c.object.nil?
+          :o
+        else
+          case c.object.send(:facing)
+          when :north
+            :_
+          when :west
+            :<
+          when :east
+            :>
+          when :south
+            '^'
+          end
+        end
+      }.join
+    end
+    puts
   end
 
   private
