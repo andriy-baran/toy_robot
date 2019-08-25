@@ -3,12 +3,14 @@ module TheToy
     extend Forwardable
 
     def_delegators :@head, :current_coordinates
+    def_delegators :@processor, :execute
 
     attr_accessor :mediator
 
-    def initialize
+    def initialize(name = 'Anonim', processor: Processor.new)
+      @name = name
       @head = Head.new(:west, x: nil, y: nil)
-      @processor = Processor.new
+      @processor = processor
       @processor.mediator = Medium.new.tap do |m|
         m.on_place = ->(x,y,facing) { self.send(:place,x,y,facing) }
         m.on_move = -> { self.send(:move) }
@@ -25,6 +27,10 @@ module TheToy
 
     def update_facing(facing)
       @head.set(facing)
+    end
+
+    def scenario=(file)
+      @processor.file = file
     end
 
     def execute_scenario
