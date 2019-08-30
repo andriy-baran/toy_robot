@@ -1,16 +1,42 @@
 module TheToy
   class Space
-    def initialize
-      @terrain = Terrain.new
-      @robot = Robot.new
-      @terrain.mediator = Medium.new.tap do |m|
-        m.when_placed = ->(x,y,facing) do
-          @robot.update_coordinates(x,y)
-          @robot.update_facing(facing)
-        end
-        m.when_moved = ->(x,y) { @robot.update_coordinates(x,y) }
+    extend Forwardable
+
+    def_delegators :@terrain, :print_map, :cells_pictograms
+
+    def initialize(terrain = Terrain.new)
+      @terrain = terrain
+      @agents = []
+    end
+
+    def add_agent(agent)
+      @agents << agent
+      sync(agent)
+    end
+
+    def start_time_async
+      threads = []
+      @agents.each do |agent|
+        threads << Thread.new { agent.execute_scenario }
       end
-      @robot.mediator = Medium.new.tap do |m|
+      threads.each(&:join)
+    end
+
+    def start_time
+      @agents.each do |agent|
+        agent.execute_scenario
+      end
+    end
+
+    def sync(agent)
+      @terrain.mediators[agent.object_id] = Medium.new.tap do |m|
+        m.when_placed = ->(x,y,facing) do
+          agent.update_coordinates(x,y)
+          agent.update_facing(facing)
+        end
+        m.when_moved = ->(x,y) { agent.update_coordinates(x,y) }
+      end
+      agent.mediator = Medium.new.tap do |m|
         m.on_scan = ->(x,y) { @terrain.cell_exists?(x,y) }
         m.on_place = ->(x,y,facing,obj) do
           @terrain[*obj.current_coordinates].object = nil if obj.placed?
@@ -22,10 +48,6 @@ module TheToy
           @terrain.move_object(from,to,obj)
         end
       end
-    end
-
-    def start_time
-      @robot.execute_scenario
     end
 
     private

@@ -1,12 +1,13 @@
 module TheToy
   class Terrain
-    attr_accessor :mediator
+    attr_accessor :mediators
 
     def initialize(size: 5)
       @size = size
       @cells = {}
+      @mediators = {}
       5.times.to_a.product(5.times.to_a).each do |x,y|
-        cell = Cell.new(x: x,y: y).extend(cell_type_module(x, y, size))
+        cell = Cell.new(x: x,y: y).extend(cell_type_module(x, y, size - 1))
         @cells[cell.name] = cell
       end
     end
@@ -20,22 +21,29 @@ module TheToy
     end
 
     def place_object(x,y,facing,obj)
+      return if cell_on(x,y) && !cell_on(x,y).object.nil?
       cell_on(x,y).object = obj
-      mediator.placed(x,y,facing)
+      mediators[obj.object_id].placed(x,y,facing)
       # print_map
     end
 
     def move_object(from,to,obj)
+      return if cell_on(*to) && !cell_on(*to).object.nil?
       cell_on(*to).object = cell_on(*from).object
       cell_on(*from).object = nil
-      mediator.moved(*to)
+      mediators[obj.object_id].moved(*to)
       # print_map
     end
 
     def print_map
       puts
-      @cells.values.each_slice(5).to_a.transpose.each do |row|
-        puts row.map { |c|
+      cells_pictograms.each{ |row| puts row }
+      puts
+    end
+
+    def cells_pictograms
+      @cells.values.each_slice(5).to_a.transpose.map do |row|
+        row.map { |c|
           if c.object.nil?
             :o
           else
@@ -52,7 +60,6 @@ module TheToy
           end
         }.join
       end
-      puts
     end
 
     private

@@ -1,5 +1,6 @@
 require 'pry'
 require 'ostruct'
+require 'tempfile'
 require 'forwardable'
 require 'the_toy/medium'
 require 'the_toy/cell'

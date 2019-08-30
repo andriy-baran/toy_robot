@@ -1,24 +1,31 @@
 module TheToy
   class Processor
     attr_accessor :mediator
-
-    def initialize
-      @commands_stream = File.open('spec/test.txt').each_line
-    end
+    attr_writer :file
 
     def run
-      loop do
-        begin
-          parse(@commands_stream.next.chomp)
-        rescue StopIteration => e
-          break
-        end
+      @file.each_line do |line|
+        parse_and_process(line.chomp)
       end
+      # loop do
+      #   begin
+      #   rescue StopIteration => e
+      #     break
+      #   end
+      # end
+    end
+
+    def file
+      @file || Tempfile.new
+    end
+
+    def execute(command)
+      parse_and_process(command)
     end
 
     private
 
-    def parse(command)
+    def parse_and_process(command)
       if matches = command.match(/PLACE\s+(\d+)\s*\,(\d+)\s*\,([\w]{4,5})/)
         x, y, facing = *matches.captures
         mediator.place(x.to_i, y.to_i, facing.downcase.to_sym)
