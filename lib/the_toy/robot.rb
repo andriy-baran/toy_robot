@@ -2,7 +2,7 @@ module TheToy
   class Robot
     extend Forwardable
 
-    def_delegators :@head, :current_coordinates
+    def_delegators :@head, :current_coordinates, :facing
     def_delegators :@processor, :execute
 
     attr_accessor :mediator
@@ -64,10 +64,6 @@ module TheToy
 
     def report
       puts @head.report_position
-    end
-
-    def facing
-      @head.facing
     end
   end
 end

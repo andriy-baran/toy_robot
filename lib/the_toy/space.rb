@@ -14,6 +14,14 @@ module TheToy
       sync(agent)
     end
 
+    def find_agent(obj_id)
+      @agents.detect{|agent| agent.object_id == obj_id}
+    end
+
+    def agents_places
+      @agents.map { |agent| [agent.object_id, agent.current_coordinates, agent.facing]  }
+    end
+
     def start_time_async
       threads = []
       @agents.each do |agent|
